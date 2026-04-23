@@ -1,0 +1,58 @@
+{
+  "company": "SavannaPay",
+  "generated_at": "2026-04-23T17:57:43.092738+00:00",
+  "signals": [
+    {
+      "signal": "crunchbase",
+      "confidence": 0.8,
+      "data": {
+        "company": "SavannaPay",
+        "source": "crunchbase",
+        "status": "stub"
+      }
+    },
+    {
+      "signal": "jobs",
+      "confidence": 0.78,
+      "data": {
+        "source": "jobs",
+        "url": "https://example.com",
+        "title": "Example Domain",
+        "preview": "Example DomainThis domain is for use in documentation examples without needing permission. Avoid use in operations.Learn more\n",
+        "compliance": {
+          "uses_login": false,
+          "uses_captcha_bypass": false
+        }
+      }
+    },
+    {
+      "signal": "layoffs",
+      "confidence": 0.68,
+      "data": {
+        "company": "SavannaPay",
+        "source": "layoffs",
+        "status": "stub"
+      }
+    },
+    {
+      "signal": "leadership",
+      "confidence": 0.73,
+      "data": {
+        "company": "SavannaPay",
+        "source": "leadership",
+        "status": "stub"
+      }
+    },
+    {
+      "signal": "ai_maturity",
+      "confidence": 0.7,
+      "data": {
+        "company": "SavannaPay",
+        "source": "ai_maturity",
+        "status": "stub"
+      }
+    }
+  ],
+  "overall_confidence": 0.738,
+  "schema_version": "v1"
+}
