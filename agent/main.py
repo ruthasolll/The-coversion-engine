@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 from fastapi import FastAPI
 
+from api.routes.sms_webhook import router as sms_webhook_v2_router
 from agent.config import load_config
 from agent.orchestrator import evaluate_policies
 from agent.routing import select_channel
@@ -18,6 +19,7 @@ load_dotenv()
 app = FastAPI(title="Conversion Engine")
 app.include_router(email_webhook_router)
 app.include_router(sms_webhook_router)
+app.include_router(sms_webhook_v2_router)
 app.include_router(calendar_webhook_router)
 app.include_router(crm_webhook_router)
 
@@ -44,3 +46,4 @@ def route(payload: dict) -> dict:
         "channel": channel,
         "reason": routing_reason,
     }
+

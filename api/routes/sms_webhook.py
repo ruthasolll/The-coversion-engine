@@ -6,7 +6,7 @@ from fastapi import APIRouter, Header, HTTPException, Request
 
 from agent.handlers.sms import handle_africastalking_inbound
 
-router = APIRouter(prefix="/webhooks/sms", tags=["sms-webhooks"])
+router = APIRouter(prefix="/api/routes/sms_webhook", tags=["sms-webhook"])
 
 
 @router.post("/africastalking")
@@ -25,4 +25,4 @@ async def africastalking_webhook(
     if not result.get("ok", False):
         raise HTTPException(status_code=400, detail=result.get("error", "webhook_rejected"))
 
-    return {"received": True, "provider": "africastalking", "result": result}
+    return {"received": True, "result": result}
