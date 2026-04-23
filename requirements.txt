@@ -8,3 +8,4 @@ requests>=2.32.3
 playwright>=1.54.0
 langfuse>=2.60.0
 hubspot-api-client>=11.2.0
+reportlab>=4.2.2
