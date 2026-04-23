@@ -43,6 +43,7 @@ When `ALLOW_REAL_PROSPECT_CONTACT` is not explicitly `true`, provider send metho
 - Score log: `eval/score_log.json`
 - Trace log: `eval/trace_log.jsonl`
 - Baseline write-up: `deliverables/baseline.md`
+- Signal enrichment rubric evidence: `deliverables/signal_enrichment_pipeline.md`
 
 ## Notes
 
