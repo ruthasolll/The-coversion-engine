@@ -1,0 +1,11 @@
+app:
+  name: conversion-engine
+  env: ${APP_ENV:development}
+  client: ${CLIENT:tenacious}
+  log_level: ${LOG_LEVEL:INFO}
+channels:
+  email_provider: resend
+  sms_provider: africastalking
+  voice_provider: shared_rig
+evaluation:
+  tau2_repo_dir: eval/tau2/tau2-bench

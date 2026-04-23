@@ -1,0 +1,13 @@
+client: tenacious
+policies:
+  confidence_threshold: 0.75
+  enforce_compliance: true
+signals:
+  - crunchbase
+  - layoffs
+  - jobs
+  - leadership
+  - ai_maturity
+  - competitor_gap
+prompts:
+  intro: "agent/prompts/tenacious/system.txt"

@@ -1,0 +1,8 @@
+version: 1
+claims:
+  - id: claim.outbound.channel_selection
+    owner: routing
+    source: agent/routing.py
+  - id: claim.policy.stop_unsub
+    owner: policy
+    source: agent/policies/stop_unsub.py

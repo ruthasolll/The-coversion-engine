@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+eval/outputs/*
+!eval/outputs/README.md
+data/*
+langfuse/
+eval/tau2/tau2-bench/
+.DS_Store

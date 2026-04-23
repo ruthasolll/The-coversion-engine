@@ -1,0 +1,10 @@
+client: acme
+policies:
+  confidence_threshold: 0.70
+  enforce_compliance: true
+signals:
+  - crunchbase
+  - cfpb_complaints
+  - news
+prompts:
+  intro: "agent/prompts/acme/system.txt"
