@@ -1,0 +1,86 @@
+{
+  "thread_id": "synthetic-2026-04-23-001",
+  "created_at": "2026-04-23T10:15:00+03:00",
+  "prospect": {
+    "prospect_id": "prospect-synth-001",
+    "name": "Amina Njoroge",
+    "title": "VP Engineering",
+    "company": "SavannaPay",
+    "email": "amina.njoroge@example.org",
+    "phone": "+254700000001",
+    "segment": "mid_market_fintech"
+  },
+  "evidence_collection": {
+    "signals": [
+      {
+        "name": "crunchbase",
+        "value": "Series B raised 14 months ago",
+        "confidence": 0.82,
+        "source": "fixture"
+      },
+      {
+        "name": "jobs",
+        "value": "4 open backend roles mention GenAI roadmap",
+        "confidence": 0.79,
+        "source": "playwright_public_page"
+      },
+      {
+        "name": "layoffs",
+        "value": "No layoffs observed in last 12 months",
+        "confidence": 0.66,
+        "source": "fixture"
+      },
+      {
+        "name": "leadership",
+        "value": "New CTO joined in Q4",
+        "confidence": 0.74,
+        "source": "fixture"
+      },
+      {
+        "name": "ai_maturity",
+        "value": "Public references to retrieval + workflow automation",
+        "confidence": 0.71,
+        "source": "heuristic"
+      }
+    ]
+  },
+  "claim_building": {
+    "primary_claim": "SavannaPay is likely in a platform-hardening phase and a fast pilot can reduce AI rollout risk.",
+    "claim_confidence": 0.77,
+    "supporting_claims": [
+      "Hiring profile indicates implementation pressure.",
+      "Recent leadership change suggests openness to controlled experiments."
+    ]
+  },
+  "judgment": {
+    "ready_for_outreach": true,
+    "channel": "email",
+    "reason": "high confidence and email available",
+    "policy_result": "pass"
+  },
+  "email_draft": {
+    "subject": "SavannaPay AI rollout risk reduction pilot",
+    "body": "Hi Amina, noticed your hiring signals around AI-enabled backend work. We help teams like yours ship risk-scoped pilots in weeks with measurable quality gates. Open to a 20-minute call next week?"
+  },
+  "gate_pass": {
+    "allow_real_prospect_contact": false,
+    "decision": "dry_run_only",
+    "explanation": "Kill switch is disabled in this synthetic run."
+  },
+  "send": {
+    "provider": "resend",
+    "result": "dry_run",
+    "message_id": "dryrun-msg-001"
+  },
+  "hubspot_update": {
+    "result": "queued",
+    "contact_payload": {
+      "icp_segment": "mid_market_fintech",
+      "enrichment_timestamp": "2026-04-23T10:16:00+03:00"
+    }
+  },
+  "calcom": {
+    "booking_link": "https://cal.com/tenacious/discovery-20",
+    "booking_event": "simulated_pending"
+  }
+}
