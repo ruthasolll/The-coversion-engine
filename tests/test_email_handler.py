@@ -47,6 +47,7 @@ class EmailHandlerTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertEqual(hubspot.calls[0]["email"], "lead@example.org")
         self.assertIn("last_email_delivered_at", hubspot.calls[0]["properties"])
+        self.assertIn("latency_ms", result)
 
     def test_missing_email_rejected(self) -> None:
         result = handle_email_event(
