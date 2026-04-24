@@ -1,58 +1,46 @@
 {
   "company": "SavannaPay",
-  "generated_at": "2026-04-23T17:57:43.092738+00:00",
   "signals": [
     {
-      "signal": "crunchbase",
-      "confidence": 0.8,
-      "data": {
-        "company": "SavannaPay",
-        "source": "crunchbase",
-        "status": "stub"
-      }
+      "signal": "crunchbase_firmographics",
+      "value": "Crunchbase request returned status 403 for SavannaPay",
+      "confidence": 0.3,
+      "source": "https://www.crunchbase.com/organization/-avannapay",
+      "timestamp": "2026-04-24T22:29:48.438427+00:00"
     },
     {
-      "signal": "jobs",
+      "signal": "job_post_velocity",
+      "value": "Jobs page title 'Example Domain' with preview length 126",
       "confidence": 0.78,
-      "data": {
-        "source": "jobs",
-        "url": "https://example.com",
-        "title": "Example Domain",
-        "preview": "Example DomainThis domain is for use in documentation examples without needing permission. Avoid use in operations.Learn more\n",
-        "compliance": {
-          "uses_login": false,
-          "uses_captcha_bypass": false
-        }
+      "source": "https://example.com",
+      "timestamp": "2026-04-24T22:30:03.466507+00:00",
+      "compliance": {
+        "uses_login": false,
+        "uses_captcha_bypass": false
       }
     },
     {
-      "signal": "layoffs",
-      "confidence": 0.68,
-      "data": {
-        "company": "SavannaPay",
-        "source": "layoffs",
-        "status": "stub"
-      }
+      "signal": "layoffs_fyi",
+      "value": "No layoffs.fyi record found for SavannaPay",
+      "confidence": 0.62,
+      "source": "data/raw/layoffs.csv",
+      "timestamp": "2026-04-24T22:30:03.510927+00:00"
     },
     {
-      "signal": "leadership",
-      "confidence": 0.73,
-      "data": {
-        "company": "SavannaPay",
-        "source": "leadership",
-        "status": "stub"
-      }
+      "signal": "leadership_change_detection",
+      "value": "No public leadership-change signal found for SavannaPay",
+      "confidence": 0.53,
+      "source": "https://duckduckgo.com/html/?q=SavannaPay+new+CTO+OR+VP+Engineering+OR+Chief+Data+Officer",
+      "timestamp": "2026-04-24T22:30:05.737369+00:00"
     },
     {
-      "signal": "ai_maturity",
+      "signal": "ai_maturity_scoring",
+      "value": "AI maturity estimate for SavannaPay: moderate confidence from public hiring/leadership proxy signals",
       "confidence": 0.7,
-      "data": {
-        "company": "SavannaPay",
-        "source": "ai_maturity",
-        "status": "stub"
-      }
+      "source": "heuristic_public_signals",
+      "timestamp": "2026-04-24T22:30:05.741261+00:00"
     }
   ],
-  "overall_confidence": 0.738,
-  "schema_version": "v1"
+  "overall_confidence": 0.586,
+  "generated_at": "2026-04-24T22:30:05.741261+00:00"
 }

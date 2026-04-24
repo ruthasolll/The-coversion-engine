@@ -7,6 +7,7 @@ from fastapi import FastAPI
 
 from api.routes.sms_webhook import router as sms_webhook_v2_router
 from agent.config import load_config
+from agent.evidence.pipeline import build_signal_artifact
 from agent.orchestrator import evaluate_policies
 from agent.routing import select_channel
 from calendars.webhook import router as calendar_webhook_router
@@ -46,4 +47,14 @@ def route(payload: dict) -> dict:
         "channel": channel,
         "reason": routing_reason,
     }
+
+
+@app.post("/enrichment/run")
+def run_enrichment(payload: dict) -> dict:
+    company = str(payload.get("company", "")).strip()
+    jobs_url = str(payload.get("jobs_url", "https://example.com")).strip()
+    if not company:
+        return {"ok": False, "error": "missing_company"}
+    artifact = build_signal_artifact(company=company, jobs_url=jobs_url)
+    return {"ok": True, "artifact": artifact}
 

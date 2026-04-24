@@ -1,29 +1,15 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
-from datetime import datetime, timezone
+from pathlib import Path
 
-from agent.evidence.sources.ai_maturity import load as ai_maturity
-from agent.evidence.sources.crunchbase import load as crunchbase
-from agent.evidence.sources.job_posts import load as jobs
-from agent.evidence.sources.layoffs import load as layoffs
-from agent.evidence.sources.leadership import load as leadership
+from enrichment.merge_pipeline import build_enrichment_artifact, save_enrichment_artifact
 
 
 def build_signal_artifact(*, company: str, jobs_url: str) -> dict:
-    signals = [
-        crunchbase(company),
-        jobs(jobs_url),
-        layoffs(company),
-        leadership(company),
-        ai_maturity(company),
-    ]
+    artifact = build_enrichment_artifact(company=company, jobs_url=jobs_url)
+    save_enrichment_artifact(artifact)
+    return artifact
 
-    overall_confidence = round(sum(float(s["confidence"]) for s in signals) / len(signals), 3)
 
-    return {
-        "company": company,
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "signals": signals,
-        "overall_confidence": overall_confidence,
-        "schema_version": "v1",
-    }
+def save_signal_artifact(artifact: dict, output_path: Path | None = None) -> Path:
+    return save_enrichment_artifact(artifact=artifact, output_path=output_path)
