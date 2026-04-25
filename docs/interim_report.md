@@ -1,7 +1,56 @@
-﻿# Interim Report (Day 0 + Early Implementation)
+# Interim Report (Day 0 + Early Implementation)
 
 ## 1) Architecture Overview
 The system is organized into orchestration (`agent/`), channel adapters (`channels/` + `integrations/`), enrichment (`enrichment/`), CRM/calendar integration (`crm/`, `calendars/`, `api/routes/`), evaluation (`eval/`), and evidence/probe layers (`evidence/`, `probes/`). A single FastAPI app wires policy checks, routing, and webhooks.
+
+## 1.1) System Architecture Diagram (Components + Directional Flows)
+```mermaid
+flowchart TD
+    A["Inbound/Outbound Events"] --> B["FastAPI App (agent/main.py)"]
+    B --> C["Policy Engine (agent/orchestrator.py)"]
+    C --> D["Channel Router (agent/routing.py)"]
+
+    D --> E["Email Primary Path"]
+    D --> F["SMS Secondary Path (Warm Leads Only)"]
+    D --> G["Voice Final Fallback"]
+
+    E --> E1["Resend/MailerSend Adapters (channels/email/*)"]
+    E1 --> E2["Email Webhooks (channels/email/webhook.py)"]
+
+    F --> F1["Africa's Talking Adapter (channels/sms/africastalking_adapter.py)"]
+    F --> F2["SMS Client + Downstream Handler (integrations/sms_client.py, agent/handlers/sms.py)"]
+    F2 --> F3["SMS Webhooks (channels/sms/webhook.py, api/routes/sms_webhook.py)"]
+
+    B --> H["Enrichment Pipeline"]
+    H --> H1["Crunchbase"]
+    H --> H2["Job Posts via Playwright"]
+    H --> H3["Layoffs"]
+    H --> H4["Leadership Change"]
+    H --> H5["AI Maturity"]
+    H --> H6["Structured Artifact + Confidence (hiring_signal_brief schema)"]
+
+    B --> I["CRM/Calendar Integrations"]
+    I --> I1["HubSpot Enriched Contact Writes (crm/hubspot_mcp.py)"]
+    I --> I2["Cal.com Booking API (calendars/calcom.py)"]
+    I2 --> I3["Cal.com Webhook"]
+    I3 --> I1
+
+    B --> J["Evaluation + Evidence"]
+    J --> J1["tau2 score/trace logs (eval/*)"]
+    J --> J2["Deliverables and synthetic E2E artifacts"]
+```
+
+## 1.2) Internal Consistency Callout (Diagram <-> Text <-> Code)
+- Diagram node `FastAPI App` maps to `agent/main.py`, which includes webhook routers and the routing endpoint.
+- Diagram node `Policy Engine` maps to `agent/orchestrator.py` and policy modules under `agent/policies/`.
+- Diagram node `Channel Router` maps to `agent/routing.py`, where channel hierarchy is enforced:
+  - Email is primary when email exists.
+  - SMS is secondary and only selected for warm leads.
+  - Voice is fallback when SMS is blocked/not eligible or no digital channel exists.
+- Diagram email path maps to `channels/email/resend_adapter.py` and `channels/email/webhook.py`.
+- Diagram SMS path maps to `channels/sms/africastalking_adapter.py`, `integrations/sms_client.py`, `agent/handlers/sms.py`, `channels/sms/webhook.py`, and `api/routes/sms_webhook.py`.
+- Diagram CRM/calendar link maps to `calendars/calcom.py`, `calendars/webhook.py`, and `crm/hubspot_mcp.py`, where booking events trigger HubSpot updates.
+- Diagram enrichment path maps to source loaders in `enrichment/tenacious/` and the structured schema in `knowledge_base/tenacious_sales_data/schemas/hiring_signal_brief.schema.json`.
 
 ## 2) Key Design Decisions
 - Added a hard kill switch: `ALLOW_REAL_PROSPECT_CONTACT=false` by default.

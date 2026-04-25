@@ -58,6 +58,14 @@ class EmailWebhookTests(unittest.TestCase):
             self.assertEqual(response.json()["status"], "error")
             self.assertIn("latency_ms", response.json())
 
+    def test_invalid_type_payload_returns_error(self) -> None:
+        response = self.client.post(
+            "/webhooks/email/resend",
+            json={"type": "", "data": {"to": ["lead@example.org"]}},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["status"], "error")
+
 
 if __name__ == "__main__":
     unittest.main()

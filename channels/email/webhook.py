@@ -48,6 +48,7 @@ def _normalize_resend(payload: dict) -> dict:
         "email": email,
         "timestamp": timestamp,
         "provider": "resend",
+        "provider_event_type": event_raw,
         "payload": payload,
     }
 
@@ -66,6 +67,7 @@ def _normalize_mailersend(payload: dict) -> dict:
         "activity.sent": "email_sent",
         "activity.delivered": "email_delivered",
         "activity.bounced": "email_bounced",
+        "activity.complained": "email_bounced",
         "activity.reply": "email_replied",
         "activity.replied": "email_replied",
     }
@@ -75,6 +77,7 @@ def _normalize_mailersend(payload: dict) -> dict:
         "email": email,
         "timestamp": timestamp,
         "provider": "mailersend",
+        "provider_event_type": event_raw,
         "payload": payload,
     }
 
@@ -84,6 +87,8 @@ def _validate_payload(payload: dict) -> tuple[bool, str]:
         return False, "payload_must_be_object"
     if "type" not in payload:
         return False, "missing_type"
+    if not isinstance(payload.get("type"), str) or not str(payload.get("type")).strip():
+        return False, "invalid_type"
     return True, ""
 
 
