@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 from fastapi import FastAPI
 
+from agent.channel_handoff import ChannelHandoffManager
 from api.routes.sms_webhook import router as sms_webhook_v2_router
 from agent.config import load_config
 from agent.evidence.pipeline import build_signal_artifact
@@ -53,8 +54,12 @@ def route(payload: dict) -> dict:
 def run_enrichment(payload: dict) -> dict:
     company = str(payload.get("company", "")).strip()
     jobs_url = str(payload.get("jobs_url", "https://example.com")).strip()
+    email = str(payload.get("email", "")).strip().lower()
     if not company:
         return {"ok": False, "error": "missing_company"}
     artifact = build_signal_artifact(company=company, jobs_url=jobs_url)
-    return {"ok": True, "artifact": artifact}
+    crm_result = {"ok": False, "action": "skipped_missing_email"}
+    if email:
+        crm_result = ChannelHandoffManager().process_enrichment_to_crm(email=email, artifact=artifact)
+    return {"ok": True, "artifact": artifact, "crm_sync": crm_result}
 

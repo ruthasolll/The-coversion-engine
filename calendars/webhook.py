@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import os
+
 from fastapi import APIRouter, Request
 
+from agent.channel_handoff import ChannelHandoffManager
 from crm.hubspot_mcp import HubSpotMCP
 
 router = APIRouter(prefix="/webhooks/calendar", tags=["calendar-webhooks"])
@@ -32,24 +35,19 @@ def process_calcom_booking_event(payload: dict, hubspot: HubSpotMCP | None = Non
     if not email:
         return {"ok": False, "error": "missing_attendee_email", "event": trigger}
 
-    hubspot = hubspot or HubSpotMCP()
-    update_result = hubspot.update_contact_properties_by_email(
+    notify_booking_email = str(payload.get("notify_booking_email", os.getenv("CALCOM_NOTIFY_BOOKING_EMAIL", "false"))).lower() == "true"
+    notify_provider = str(payload.get("notify_provider", os.getenv("CALCOM_NOTIFY_PROVIDER", "resend"))).strip().lower()
+    handoff = ChannelHandoffManager(hubspot=hubspot or HubSpotMCP())
+    result = handoff.process_calcom_booking(
         email=email,
-        properties={
-            "calcom_booking_id": booking_id,
-            "calcom_booking_link": booking_link,
-            "calcom_booking_status": "booked",
-            "calcom_last_booked_at": booked_at,
-            "last_booking_source": "calcom",
-            "tenacious_status": "draft",
-        },
+        booking_id=booking_id,
+        booking_link=booking_link,
+        booked_at=booked_at,
+        notify=notify_booking_email,
+        provider=notify_provider,
     )
-    return {
-        "ok": bool(update_result.get("ok")),
-        "action": "hubspot_updated" if update_result.get("ok") else "hubspot_update_failed",
-        "event": trigger,
-        "hubspot": update_result,
-    }
+    result["event"] = trigger
+    return result
 
 
 @router.post("/calcom")

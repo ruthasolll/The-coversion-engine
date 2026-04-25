@@ -23,7 +23,7 @@ class EmailWebhookTests(unittest.TestCase):
         self.assertIn("latency_ms", response.json())
 
     def test_valid_payload_emits_downstream(self) -> None:
-        with patch("channels.email.webhook.handle_email_event") as mocked:
+        with patch("channels.email.webhook.process_email_event") as mocked:
             mocked.return_value = {
                 "ok": True,
                 "event_type": "email_delivered",
@@ -44,7 +44,7 @@ class EmailWebhookTests(unittest.TestCase):
             self.assertIn("latency_ms", response.json())
 
     def test_handler_failure_returns_error_outcome(self) -> None:
-        with patch("channels.email.webhook.handle_email_event") as mocked:
+        with patch("channels.email.webhook.process_email_event") as mocked:
             mocked.return_value = {"ok": False, "error": "downstream_failed"}
             response = self.client.post(
                 "/webhooks/email/resend",

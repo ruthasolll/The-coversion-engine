@@ -8,7 +8,8 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
-from agent.handlers.email import handle_email_event
+from channels.email.event_emitter import HandoffEmailEventEmitter
+from channels.email.processor import process_email_event
 from channels.email.tracing import EmailWebhookTracer
 
 logger = logging.getLogger(__name__)
@@ -182,7 +183,7 @@ async def _process_webhook(provider: str, request: Request, normalizer) -> JSONR
                 "email": normalized_event.get("email"),
             },
         )
-        result = handle_email_event(normalized_event)
+        result = process_email_event(normalized_event, emitter=HandoffEmailEventEmitter())
         handler_latency_ms = round((time.time() - handle_start) * 1000, 2)
         tracer.end_span(
             handle_span,

@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from agent.channel_handoff import ChannelHandoffManager
 from agent.policies.stop_unsub import STOP_WORDS
-from integrations.sms_client import AfricasTalkingSMSClient, SMSSendResult
+from integrations.sms_client import SMSSendResult
 
 
 @dataclass
@@ -26,23 +27,15 @@ class SMSDownstream:
 
 
 def is_warm_lead(payload: dict) -> bool:
-    if bool(payload.get("warm_lead")):
-        return True
-    lead_temp = str(payload.get("lead_temperature", "")).strip().lower()
-    return lead_temp in {"warm", "hot", "qualified"}
+    email_replied = bool(payload.get("email_replied"))
+    engagement_status = str(payload.get("email_engagement_status", "")).strip().lower()
+    return email_replied or engagement_status == "replied"
 
 
 def send_outbound_sms(phone: str, message: str, payload: dict | None = None) -> SMSSendResult:
     payload = payload or {}
-    if not is_warm_lead(payload):
-        return SMSSendResult(
-            ok=False,
-            provider="africastalking",
-            status_code=403,
-            message="sms_blocked_not_warm_lead",
-        )
-    client = AfricasTalkingSMSClient()
-    return client.send(phone=phone, message=message)
+    handoff = ChannelHandoffManager()
+    return handoff.send_sms_after_email_reply(phone=phone, message=message, payload=payload)
 
 
 def handle_africastalking_inbound(payload: dict, downstream: SMSDownstream | None = None) -> dict:
