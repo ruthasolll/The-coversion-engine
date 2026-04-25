@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from agent.handlers.email import handle_email_event
+from agent.handlers.email import handle_email_event, normalize_email_status
 from channels.email.webhook import _normalize_resend
 
 
@@ -12,7 +12,7 @@ class FakeHandoff:
         self.error = error
         self.calls: list[dict] = []
 
-    def process_email_event(self, event: dict) -> dict:
+    def process_event(self, event: dict) -> dict:
         self.calls.append(event)
         if self.ok:
             return {"ok": True, "action": "record_event_only", "event_type": event.get("event_type")}
@@ -20,6 +20,18 @@ class FakeHandoff:
 
 
 class EmailHandlerTests(unittest.TestCase):
+    def test_normalize_email_status_delivered(self) -> None:
+        self.assertEqual(normalize_email_status("email_delivered"), "delivered")
+
+    def test_normalize_email_status_bounced(self) -> None:
+        self.assertEqual(normalize_email_status("email_bounced"), "bounced")
+
+    def test_normalize_email_status_unknown_defaults_sent(self) -> None:
+        self.assertEqual(normalize_email_status("email_unknown"), "sent")
+
+    def test_normalize_email_status_empty_defaults_sent(self) -> None:
+        self.assertEqual(normalize_email_status(""), "sent")
+
     def test_normalize_resend_bounce(self) -> None:
         event = _normalize_resend(
             {
@@ -40,7 +52,7 @@ class EmailHandlerTests(unittest.TestCase):
                 "data": {"to": ["lead@example.org"]},
             }
         )
-        self.assertEqual(event["event_type"], "email_bounced")
+        self.assertEqual(event["event_type"], "email_complained")
 
     def test_handle_email_event_uses_handoff(self) -> None:
         handoff = FakeHandoff(ok=True)

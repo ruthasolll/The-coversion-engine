@@ -16,7 +16,11 @@ class AfricasTalkingAdapter:
 
         response = requests.post(
             self.base_url,
-            headers={"apiKey": api_key, "Accept": "application/json"},
+            headers={
+                "apiKey": api_key,
+                "Content-Type": "application/x-www-form-urlencoded",
+                "Accept": "application/json",
+            },
             data={"username": username, "to": phone, "message": message},
             timeout=15,
         )

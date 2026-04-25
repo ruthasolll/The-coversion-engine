@@ -10,7 +10,6 @@ from api.routes.sms_webhook import router as sms_webhook_v2_router
 from agent.config import load_config
 from agent.evidence.pipeline import build_signal_artifact
 from agent.orchestrator import evaluate_policies
-from agent.routing import select_channel
 from calendars.webhook import router as calendar_webhook_router
 from channels.email.webhook import router as email_webhook_router
 from channels.sms.webhook import router as sms_webhook_router
@@ -42,7 +41,7 @@ def route(payload: dict) -> dict:
     passed, reason = evaluate_policies(payload)
     if not passed:
         return {"status": "blocked", "reason": reason}
-    channel, routing_reason = select_channel(payload)
+    channel, routing_reason = ChannelHandoffManager().determine_channel(payload)
     return {
         "status": "accepted",
         "channel": channel,

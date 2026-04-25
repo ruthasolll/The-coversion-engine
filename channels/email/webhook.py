@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import time
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
-from channels.email.event_emitter import HandoffEmailEventEmitter
-from channels.email.processor import process_email_event
+from agent.handlers.email import handle_email_event
 from channels.email.tracing import EmailWebhookTracer
 
 logger = logging.getLogger(__name__)
@@ -23,6 +23,10 @@ def _utc_now() -> str:
 
 def _is_valid_email(value: str) -> bool:
     return "@" in value and "." in value.split("@")[-1]
+
+
+def _debug_hubspot_enabled() -> bool:
+    return os.getenv("DEBUG_HUBSPOT", "false").strip().lower() == "true"
 
 
 def _normalize_resend(payload: dict) -> dict:
@@ -40,7 +44,7 @@ def _normalize_resend(payload: dict) -> dict:
         "email.sent": "email_sent",
         "email.delivered": "email_delivered",
         "email.bounced": "email_bounced",
-        "email.complained": "email_bounced",
+        "email.complained": "email_complained",
         "email.replied": "email_replied",
     }
     event_type = event_map.get(event_raw, "")
@@ -68,7 +72,7 @@ def _normalize_mailersend(payload: dict) -> dict:
         "activity.sent": "email_sent",
         "activity.delivered": "email_delivered",
         "activity.bounced": "email_bounced",
-        "activity.complained": "email_bounced",
+        "activity.complained": "email_complained",
         "activity.reply": "email_replied",
         "activity.replied": "email_replied",
     }
@@ -183,7 +187,7 @@ async def _process_webhook(provider: str, request: Request, normalizer) -> JSONR
                 "email": normalized_event.get("email"),
             },
         )
-        result = process_email_event(normalized_event, emitter=HandoffEmailEventEmitter())
+        result = handle_email_event(normalized_event)
         handler_latency_ms = round((time.time() - handle_start) * 1000, 2)
         tracer.end_span(
             handle_span,
@@ -204,6 +208,39 @@ async def _process_webhook(provider: str, request: Request, normalizer) -> JSONR
 
         if not result.get("ok", False):
             logger.warning("email_event_handler_failed", extra={"provider": provider, "result": result})
+            error_body = {
+                "status": "error",
+                "error": str(result.get("error", "handler_failed")),
+                "latency_ms": latency_ms,
+                "action": str(result.get("action", "")),
+            }
+            if _debug_hubspot_enabled():
+                error_body["details"] = str(result.get("details", ""))
+                error_body["trace"] = str(result.get("trace", ""))
+                error_body["payload_sent"] = result.get("payload_sent")
+                error_body["hubspot_response_body"] = result.get("body", result.get("response_body"))
+                error_body["validation"] = result.get("validation")
+            # Gracefully continue for CRM-only failures so orchestration does not break.
+            if str(result.get("error", "")).strip().lower() in {"hubspot_update_failed", "hubspot_payload_invalid"}:
+                graceful_body = {
+                    "status": "ok",
+                    "action": "record_event_only",
+                    "hubspot_status": "failed",
+                    "error": None,
+                    "latency_ms": latency_ms,
+                }
+                # Always include HubSpot diagnostics on graceful CRM fallback.
+                graceful_body["details"] = str(result.get("details", ""))
+                graceful_body["status_code"] = result.get("status_code")
+                graceful_body["body"] = result.get("body")
+                graceful_body["payload_sent"] = result.get("payload_sent")
+                graceful_body["hubspot_response_body"] = result.get("body", result.get("response_body"))
+                graceful_body["validation"] = result.get("validation")
+                graceful_body["search_result_count"] = result.get("search_result_count")
+                graceful_body["attempted_payloads"] = result.get("attempted_payloads")
+                if _debug_hubspot_enabled():
+                    graceful_body["trace"] = str(result.get("trace", ""))
+                return JSONResponse(status_code=200, content=graceful_body)
             tracer.finalize(
                 success=False,
                 metadata={
@@ -218,11 +255,7 @@ async def _process_webhook(provider: str, request: Request, normalizer) -> JSONR
             )
             return JSONResponse(
                 status_code=400,
-                content={
-                    "status": "error",
-                    "error": str(result.get("error", "handler_failed")),
-                    "latency_ms": latency_ms,
-                },
+                content=error_body,
             )
 
         logger.info("email_event_handler_succeeded", extra={"provider": provider, "result": result})
@@ -242,6 +275,8 @@ async def _process_webhook(provider: str, request: Request, normalizer) -> JSONR
             content={
                 "status": "success",
                 "event_type": str(normalized_event.get("event_type", "")),
+                "hubspot_action": result.get("hubspot_action"),
+                "search_result_count": result.get("search_result_count"),
                 "latency_ms": latency_ms,
             },
         )

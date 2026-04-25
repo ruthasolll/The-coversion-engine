@@ -9,10 +9,10 @@ from agent.handlers.sms import handle_africastalking_inbound
 router = APIRouter(prefix="/webhooks/sms", tags=["sms-webhooks"])
 
 
-@router.post("/africastalking")
-async def africastalking_webhook(
+async def process_africastalking_webhook(
     request: Request,
-    x_africastalking_signature: str | None = Header(default=None),
+    *,
+    x_africastalking_signature: str | None,
 ) -> dict:
     form = await request.form()
     payload = dict(form)
@@ -26,3 +26,14 @@ async def africastalking_webhook(
         raise HTTPException(status_code=400, detail=result.get("error", "webhook_rejected"))
 
     return {"received": True, "provider": "africastalking", "result": result}
+
+
+@router.post("/africastalking")
+async def africastalking_webhook(
+    request: Request,
+    x_africastalking_signature: str | None = Header(default=None),
+) -> dict:
+    return await process_africastalking_webhook(
+        request,
+        x_africastalking_signature=x_africastalking_signature,
+    )

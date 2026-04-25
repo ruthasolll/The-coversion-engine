@@ -88,6 +88,36 @@ class HubSpotEnrichedWriteTests(unittest.TestCase):
         self.assertFalse(result["ok"])
         self.assertEqual(result["error"], "missing_email")
 
+    def test_update_contact_properties_validation_failure_skips_hubspot_call(self) -> None:
+        mcp = HubSpotMCP()
+        fake_client = FakeHubSpotClient(existing_id="contact-42")
+        mcp.client = fake_client
+        result = mcp.update_contact_properties_by_email(
+            email="lead@example.org",
+            properties={
+                "email_delivery_status": "invalid-status",
+                "last_email_bounced_at": "not-an-iso-time",
+            },
+        )
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["error"], "hubspot_payload_invalid")
+        self.assertEqual(result["action"], "skip_hubspot_call")
+        self.assertIsNone(fake_client.crm.contacts.basic_api.updated)
+
+    def test_update_contact_properties_creates_when_contact_missing(self) -> None:
+        mcp = HubSpotMCP()
+        fake_client = FakeHubSpotClient(existing_id=None)
+        mcp.client = fake_client
+        result = mcp.update_contact_properties_by_email(
+            email="newlead@example.org",
+            properties={"email_delivery_status": "delivered", "last_email_provider": "resend"},
+        )
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["action"], "created")
+        self.assertEqual(result["status_code"], 201)
+        self.assertEqual(result["search_result_count"], 0)
+        self.assertIsNotNone(fake_client.crm.contacts.basic_api.created)
+
 
 if __name__ == "__main__":
     unittest.main()

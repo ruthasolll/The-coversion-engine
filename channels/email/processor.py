@@ -6,7 +6,7 @@ from channels.email.event_emitter import EmailEventEmitter, build_email_event
 
 logger = logging.getLogger(__name__)
 
-SUPPORTED_EMAIL_EVENTS = {"email_sent", "email_delivered", "email_bounced", "email_replied"}
+SUPPORTED_EMAIL_EVENTS = {"email_sent", "email_delivered", "email_bounced", "email_complained", "email_replied"}
 
 
 def process_email_event(event: dict, emitter: EmailEventEmitter) -> dict:
@@ -35,6 +35,16 @@ def process_email_event(event: dict, emitter: EmailEventEmitter) -> dict:
     logger.info(
         "email_event_processed",
         extra={
+            "event_type": event_type,
+            "email": email,
+            "provider": provider,
+            "ok": bool(emitted.get("ok")),
+        },
+    )
+    logger.info(
+        "email_pipeline_stage",
+        extra={
+            "stage": "processor_output",
             "event_type": event_type,
             "email": email,
             "provider": provider,
