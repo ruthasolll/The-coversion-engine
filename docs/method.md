@@ -255,6 +255,32 @@ Keep score, disable policy gates.
 
 Expected: A1-A3 each increase overcommitment incidents vs A0.
 
+## 11.1 Statistical Significance Plan
+Primary hypothesis:
+- **H0**: Act IV does not reduce bench-overcommitment trigger rate versus baseline.
+- **H1**: Act IV reduces bench-overcommitment trigger rate versus baseline.
+
+Named test:
+- **Two-proportion z-test** on failure rates (`failed_runs / total_runs`) comparing A0 vs each ablation (A1, A2, A3).
+
+Significance threshold:
+- `alpha = 0.05`
+- Reject H0 if `p_value < 0.05`.
+
+Interpretation rule:
+1. If `p_value < 0.05` and A0 failure rate is lower, treat mitigation as statistically supported.
+2. If `p_value >= 0.05`, treat difference as inconclusive and do not claim mitigation win.
+3. Report both p-value and absolute effect size (`delta_failure_rate`) for each comparison.
+
+Multiple comparisons handling:
+- Since A0 is compared against 3 ablations, apply Bonferroni correction:
+  - `alpha_corrected = 0.05 / 3 = 0.0167`
+  - Final significance decision uses `p_value < 0.0167`.
+
+Power/volume guideline:
+- Minimum evaluation volume per arm: `n >= 200` qualified runs.
+- If volume is below threshold, mark result as underpowered even if p-value is low.
+
 ## 12. Monitoring Outputs
 Persist for every run:
 1. input hashes (`hiring_signal_brief_id`, `bench_snapshot_id`)
@@ -263,4 +289,3 @@ Persist for every run:
 4. final outbound decision
 
 This enables replay, debugging, and postmortem root-cause verification.
-
