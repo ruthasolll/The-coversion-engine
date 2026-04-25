@@ -14,6 +14,9 @@ Core runtime layers:
 - `eval/`: tau-bench harness area plus score/trace artifacts.
 - `evidence/` and `probes/`: claim graphing and targeted failure probes.
 
+Detailed architecture + flow diagram:
+- `docs/ARCHITECTURE.md`
+
 ## Safety Kill Switch
 
 Set `ALLOW_REAL_PROSPECT_CONTACT=false` in `.env` by default.
@@ -37,6 +40,11 @@ When `ALLOW_REAL_PROSPECT_CONTACT` is not explicitly `true`, provider send metho
    `powershell -ExecutionPolicy Bypass -File scripts/smoke_test.ps1`
 5. Start local API:
    `powershell -ExecutionPolicy Bypass -File scripts/run_local.ps1`
+
+For complete bootstrapping, webhook registration, and environment variable reference:
+- `SETUP.md`
+- `DIRECTORY_MAP.md`
+- `HANDOFF_NOTES.md`
 
 ## Evaluation Artifacts
 
